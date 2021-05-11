@@ -125,6 +125,7 @@ void Net::feedForward(const VectorBatch &input) {
   std::vector<bool> completions(numStages*layers.size(), false);  
   std::vector<int > mvproducts(layers.size(), 0);
   // cout << "numlayers: " << layers.size() << endl;
+  // cout << "numStages: " << numStages     << endl;
   
   for (int stage = 0; stage < numStages; stage++) {
     #pragma omp task priority(2) shared(completions, input, mvproducts)
