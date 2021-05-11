@@ -103,15 +103,15 @@ void Net::set_uniform_biases(float v) {
     l.set_uniform_biases(v);
 };
 
-void Net::ffhelper(int stage, int layer, const VectorBatch &input, std::vector<bool> &completions) {
+void Net::ffhelper(int stage, int layer, const VectorBatch &input, std::vector<bool> &completions, std::vector<int> &mvproducts) {
 
   assert(completions[(layer-1)*numStages+stage]);
-  this->layers.at(layer).forward(this->layers.at(layer-1).activated_batch, stage, numStages);
+  this->layers.at(layer).forward(this->layers.at(layer-1).activated_batch, stage, numStages, mvproducts, layer);
   completions[layer*numStages+stage] = true;
   if (layer+1 < layers.size()) {
-    #pragma omp task shared(completions, input)
+    #pragma omp task shared(completions, input, mvproducts)
     {
-      ffhelper(stage, layer+1, input, completions);
+      ffhelper(stage, layer+1, input, completions, mvproducts);
     }
   }
 }
@@ -123,17 +123,18 @@ void Net::feedForward(const VectorBatch &input) {
   allocate_batch_specific_temporaries(input.batch_size());
 
   std::vector<bool> completions(numStages*layers.size(), false);  
+  std::vector<int > mvproducts(layers.size(), 0);
   // cout << "numlayers: " << layers.size() << endl;
   
   for (int stage = 0; stage < numStages; stage++) {
-    #pragma omp task priority(2) shared(completions)
+    #pragma omp task priority(2) shared(completions, input, mvproducts)
       {
-        this->layers.front().forward(input, stage, numStages); // Forwarding the input
+        this->layers.front().forward(input, stage, numStages, mvproducts, 0); // Forwarding the input
         completions[stage] = true;
 
-        #pragma omp task shared(completions, input)
+        #pragma omp task shared(completions, input, mvproducts)
         {
-          ffhelper(stage, 1, input, completions);
+          ffhelper(stage, 1, input, completions, mvproducts);
         }
 
       }

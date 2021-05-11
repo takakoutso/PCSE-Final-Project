@@ -74,7 +74,7 @@ void Layer::set_uniform_biases(float v) {
 };
 
 //codesnippet layerforward
-void Layer::forward(const VectorBatch &prevVals, int stage, int numStages) {
+void Layer::forward(const VectorBatch &prevVals, int stage, int numStages, std::vector<int> &mvproducts, int level) {
 #ifdef DEBUG
   cout << "Forward layer " << layer_number
        << ": " << input_size() << "->" << output_size() << endl;
@@ -83,15 +83,23 @@ void Layer::forward(const VectorBatch &prevVals, int stage, int numStages) {
     unsigned batch_idx_start = (prevVals.batch_size() * (stage  )) / numStages;
     unsigned batch_idx_end   = (prevVals.batch_size() * (stage+1)) / numStages;
 
-    assert( prevVals.notnan() ); assert( prevVals.notinf() );
+    // assert( prevVals.notnan() ); assert( prevVals.notinf() );
     prevVals.v2mp( weights, activated_batch, batch_idx_start, batch_idx_end );
-    assert( activated_batch.notnan() ); assert( activated_batch.notinf() );
+    // assert( activated_batch.notnan() ); assert( activated_batch.notinf() );
 
-    activated_batch.addh(biases); // Add the bias
-    assert( activated_batch.notnan() ); assert( activated_batch.notinf() );
+    int  b = 0;
+    #pragma omp single 
+    {
+      b = ++mvproducts[level];
+    }
 
-    apply_activation_batch(activated_batch, activated_batch);
-    assert( activated_batch.notnan() ); assert( activated_batch.notinf() );
+    if (b == numStages) {
+      activated_batch.addh(biases); // Add the bias
+      assert( activated_batch.notnan() ); assert( activated_batch.notinf() );
+
+      apply_activation_batch(activated_batch, activated_batch);
+      assert( activated_batch.notnan() ); assert( activated_batch.notinf() );
+    }
 }
 //codesnippet end
 

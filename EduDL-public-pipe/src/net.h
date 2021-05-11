@@ -54,7 +54,7 @@ public:
     void set_uniform_biases(float);
 
 
-    void ffhelper(int stage, int layer, const VectorBatch &input, std::vector<bool> &completions);
+    void ffhelper(int stage, int layer, const VectorBatch &input, std::vector<bool> &completions, std::vector<int> &products);
     void feedForward( const Vector& );
     void feedForward( const VectorBatch& );
 

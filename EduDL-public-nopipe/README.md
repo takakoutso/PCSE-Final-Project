@@ -1,41 +1,23 @@
-# EduDL-public
+# EduDL-public-nopipe
 
-This is the repository for the open source deep learning network EduDL,
-a network written for educational purposes, rather than production.
+This is the non-pipelined implementation for a final project for SDS374C Spring 2021. Majority of code was taken
+from Viktor Eijkhout(https://github.com/VictorEijkhout/EduDL-public/tree/main/src). Please
+refer to that project's READMEs as well
 
-## Installation
+## Compiling
 
-You need to customize the makefile to your local machine by editing `Make.inc`:
+Simply navigate to /src and run:
 
-1. Indicate whether you have the [BLIS](https://github.com/flame/blis)
- library 
-2. Set your compiler and options
-3. Indicate the location of the [cxxops](https://github.com/jarro2783/cxxopts) library which is needed for the example networks
+    make test
 
-## Example applications
+This will compile all files to the ./test_mnist executible
 
-Currently there are two main programs that can be built with the supplied Makefile:
+## Running Code
 
-    make testdl
-    make posneg
-    
-These test programs are driven by commandline options; run 
+Run:
 
-    ./testdl -h
-    ./posneg -h
-    
-to see available options.
+    ./test_mnist -h 
 
-The `testdl` parses the MNIST dataset, and you can test it by:
-
-    ./testdl -e 4 -l 4 -d ../../mnist/
-
-You can make your own network by taking either of these as example.
-More thorough documentation is forthcoming.
-
-## High performance
-
-All linear algebra routines have been abstracted to a number of matrix and vector operations, for which currently two implementations are given:
-
-1. The textbook implementations in files with `_impl_reference.cpp` names, and
-2. Optimized implementations using the BLIS library (see above) in files with `_impl_blis.cpp` names.
+for a list of command line arguments to run the pipelined model on. 
+The only necessary argument is given by the `-d` flag, for which one must specify
+the mnist directory location

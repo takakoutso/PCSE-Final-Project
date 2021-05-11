@@ -58,7 +58,7 @@ public:
   //    void set_initial_deltas( const Matrix&, const Vector& );
     void set_recursive_deltas( Vector &, const Layer&,const Layer& );
     void allocate_batch_specific_temporaries(int batchsize);
-    void forward( const VectorBatch &prevVals, int stage, int numStages);
+    void forward( const VectorBatch &prevVals, int stage, int numStages, std::vector<int> &mvproducts, int level);
     void backward(const VectorBatch &delta, const Matrix &W, const VectorBatch &prev);
     void backward_update( const VectorBatch&, const VectorBatch& ,bool=false );
     void update_dw(const VectorBatch &delta, const VectorBatch& prevValues);
